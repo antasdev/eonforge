@@ -23,7 +23,7 @@ const pageNotFound = async (req, res) => {
 
 const loadHomePage = async (req, res) => {
   try {
-    const userId = req.session.userId;
+    const userId = req.session.userId||null;
     const categories = await Category.find({ isListed: true });
 
     let productData = await Product.find({
