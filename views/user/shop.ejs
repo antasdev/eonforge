@@ -324,7 +324,7 @@
               class="block w-full mt-2 border border-gray-300 text-gray-700 py-2 px-4 rounded hover:bg-gray-50 transition text-center">
               Clear All Filters
             </a>
-          </form>
+         
         </aside>
 
         <!-- Product Listing -->
@@ -342,6 +342,7 @@
               </div>
               <div class="flex items-center">
                 <span class="mr-2">Sort by:</span>
+                
                 <select id="sortSelect" name="sort"
                   class="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-gray-200">
                   <option value="featured" <%=sort==='featured' ? 'selected' : '' %>>Featured</option>
@@ -353,6 +354,7 @@
                   <option value="name-z-a" <%=sort==='name-z-a' ? 'selected' : '' %>>Name: Z to A</option>
                 </select>
               </div>
+             </form>
             </div>
 
             <!-- Products Grid -->
@@ -380,8 +382,7 @@
                         data-product-id="<%= product._id %>"
                         data-variant-id="<%= product.selectedVariant._id %>"
                         data-stock="<%= product.colorVariants[0].stock || 1 %>">
-<i class="fas fa-shopping-cart icon-animate <%= cartProduct.includes(product._id.toString()) %>"></i>
-                        <span class="add-to-cart-spinner hidden"></span>
+<i class="fas fa-shopping-cart icon-animate <%= cartProduct.includes(product._id.toString()) ?'fas text-red-600' : 'far' %> fa-heart %>"></i>
                       </button>
                     </div>
                     <div class="p-4">
@@ -570,6 +571,7 @@
         sortFilter.addEventListener('change', () => {
           document.getElementById('filterForm').submit();
         });
+      
 
         // View toggle (grid/list)
         document.addEventListener('DOMContentLoaded', () => {
@@ -626,7 +628,7 @@
               const variantId = button.getAttribute('data-variant-id');
               const stock = button.getAttribute('data-stock');
               const icon = button.querySelector('i');
-              const spinner = button.querySelector('.add-to-cart-spinner');
+          
 
            
               //  icon.classList.add('scale-110', 'transition-transform');
@@ -636,7 +638,7 @@
                // Show loading state
                button.disabled = true;
                icon.classList.add('hidden');
-               spinner.classList.remove('hidden');
+            
                
               try {
                 const response = await fetch('/addCart', {
@@ -650,36 +652,33 @@
 
                 const data = await response.json();
 
-                   // ✅ Ensure final state matches backend
-                  //  if (data.action === 'added') {
-                  //    icon.classList.add('text-red-600');
-                  //  } 
+                 
                    
                 if (response.ok) {
                   // Update cart count badge
-                  const cartCountBadge = document.getElementById('cartCountBadge');
+                   const cartCountBadge = document.getElementById('cartCountBadge');
                   if (cartCountBadge) {
                     cartCountBadge.textContent = data.cartCount;
                     cartCountBadge.classList.remove('hidden');
                   }
-                  
-                  
-                  showToast('Product added to cart successfully!', 'success');
-
-                  // Show success state
-                  button.classList.add('active');
+                
+                  // ⭐ Update icon based on backend toggle
+                  if (data.inCart === true) {
+                    icon.classList.add('text-red-600');
+                  } else {
+                    icon.classList.remove('text-red-600');
+                  }
+                
                   icon.classList.remove('hidden');
-                  spinner.classList.add('hidden');
-                  setTimeout(() => {
-                    // Reset button (remove active state unless backend indicates item is still in cart)
-                    button.classList.remove('active');
-                    button.disabled = false;
-                  }, 1500);
+                  button.disabled = false;
+                
+                  showToast(data.message, 'success');
+                                
                 } else {
                   showToast(data.message || 'Failed to add product to cart.', 'error');
                   // Reset button
                   icon.classList.remove('hidden');
-                  spinner.classList.add('hidden');
+            
                   button.disabled = false;
                 }
               } catch (error) {
@@ -687,7 +686,6 @@
                 showToast('Please login to manage Cart', 'error');
                 // Reset button
                 icon.classList.remove('hidden');
-                spinner.classList.add('hidden');
                 button.disabled = false;
               }
             });

@@ -219,7 +219,7 @@ const addProduct = async (req, res) => {
     });
 
     await newProduct.save();
-    console.log('Product saved successfully:', newProduct._id);
+ 
     res.status(200).json({ success: true, message: 'Product added successfully' });
   } catch (err) {
     console.error('Error adding product:', err, err.stack);
@@ -236,8 +236,7 @@ const updateProduct = async (req, res) => {
     const productId = req.params.id;
     const { productName, description, brand, category, colorVariants, hasOffer } = req.body;
 
-    console.log('updateProduct - Request body:', req.body);
-    console.log('updateProduct - Request files:', req.files);
+   
 
     // Validate required fields
     if (!productName?.trim() || !description?.trim() || !brand || !category || !colorVariants) {
@@ -324,7 +323,7 @@ const updateProduct = async (req, res) => {
             if (fs.existsSync(fullPath)) {
               try {
                 fs.unlinkSync(fullPath);
-                console.log(`Deleted image: ${fullPath}`);
+              
               } catch (err) {
                 console.error(`Failed to delete image ${fullPath}:`, err);
               }
@@ -390,10 +389,10 @@ const updateProduct = async (req, res) => {
       hasOffer: hasOffer,
       status: updatedVariants.some(v => v.stock > 0 && v.isActive === 'Available') ? 'Available' : 'Out of Stock'
     };
-  console.log('offer is working active',updateDoc)
+
   
     await Product.findByIdAndUpdate(productId, updateDoc, { new: true });
-    console.log('Product updated successfully:', productId);
+  
     res.json({ success: true, message: 'Product updated successfully' });
   } catch (err) {
     console.error('Error updating product:', err, err.stack);
@@ -470,8 +469,7 @@ const updateVariant = async (req, res) => {
     const { productId, variantId } = req.params;
     const { colorVariants } = req.body;
 
-    console.log('updateVariant - Request body:', req.body);
-    console.log('updateVariant - Request files:', req.files);
+  
 
     // Validate colorVariants presence
     if (!colorVariants) return res.status(400).json({ success: false, message: 'Missing colorVariants data' });
@@ -543,7 +541,7 @@ const updateVariant = async (req, res) => {
           if (fs.existsSync(fullPath)) {
             try {
               fs.unlinkSync(fullPath);
-              console.log(`Deleted image: ${fullPath}`);
+            
             } catch (err) {
               console.error(`Failed to delete image ${fullPath}:`, err);
             }
@@ -560,7 +558,7 @@ const updateVariant = async (req, res) => {
       const output = path.join(resizedDir, newName);
       try {
         await sharp(file.path).resize(800, 800, { fit: 'cover' }).toFile(output);
-        console.log(`Successfully processed image: ${newName}`);
+       
         imagePaths.push(`/uploads/product-resized/${newName}`);
       } catch (sharpErr) {
         console.error(`Sharp error for file ${file.originalname}:`, sharpErr);
@@ -569,7 +567,7 @@ const updateVariant = async (req, res) => {
         if (fs.existsSync(file.path)) {
           try {
             fs.unlinkSync(file.path);
-            console.log(`Deleted temporary file: ${file.path}`);
+          
           } catch (unlinkErr) {
             console.error(`Failed to delete temp file ${file.path}:`, unlinkErr);
           }
@@ -604,7 +602,7 @@ const updateVariant = async (req, res) => {
     product.status = product.colorVariants.some(v => v.stock > 0 && v.isActive === 'Available') ? 'Available' : 'Out of Stock';
 
     await product.save();
-    console.log('Variant updated successfully:', variantId);
+  
     res.json({ success: true, message: 'Variant updated successfully' });
   } catch (err) {
     console.error('Error updating variant:', err, err.stack);
@@ -621,7 +619,7 @@ const toggleProductStatus = async (req, res) => {
     const productId = req.params.id;
     const { isBlocked } = req.body;
 
-    console.log('toggleProductStatus - Product ID:', productId, 'isBlocked:', isBlocked);
+    
 
     if (!mongoose.Types.ObjectId.isValid(productId)) {
       return res.status(400).json({ success: false, message: 'Invalid product ID' });
@@ -635,15 +633,10 @@ const toggleProductStatus = async (req, res) => {
     const newBlockedState = isBlocked !== undefined ? isBlocked : !product.isBlocked;
     product.isBlocked = newBlockedState;
 
-    // Update product status: consider both product and variant isBlocked states
-    // product.status = product.isBlocked
-    //   ? 'Out of Stock' // If product is blocked, it’s unavailable
-    //   : product.colorVariants.some(v => v.stock > 0 && v.isActive === 'Available' && !v.isBlocked)
-    //   ? 'Available'
-    //   : 'Out of Stock';
+   
 
     await product.save();
-    console.log('Product status toggled:', product._id, 'isBlocked:', product.isBlocked);
+
 
     const action = product.isBlocked ? 'blocked' : 'unblocked';
     res.json({ success: true, message: `Product ${action} successfully`, isBlocked: product.isBlocked });

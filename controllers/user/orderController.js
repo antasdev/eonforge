@@ -31,7 +31,7 @@ const orderDetails = async (req, res) => {
         const userId = req.session.userId;
         if (!userId) return res.redirect('/login');
         const { orderId } = req.query
-        console.log('order details page again same product', orderId)
+        
 
         // Find the most recent order for the user
         const order = await Order.findOne({ userId, orderId })
@@ -47,7 +47,7 @@ const orderDetails = async (req, res) => {
         }
 
         const user = await User.findById(userId);
-        console.log('User data for order details:', user.firstName);
+        
 
         // Process order items for display
         let orderItems = [];
@@ -85,7 +85,7 @@ const orderDetails = async (req, res) => {
             subtotal = orderItems.reduce((sum, item) => sum + item.total, 0);
         }
 
-        console.log('itemid get needed thats why this', order)
+        
 
         // Prepare address data from order
         const addresses = [{
@@ -101,7 +101,7 @@ const orderDetails = async (req, res) => {
 
         // Calculate delivery fee if not stored separately
         const deliveryFee = 50
- console.log('orderitems',orderItems)
+
         res.render('order-details', {
             paymentMethod: order.paymentMethod,
             orderId: order.orderId,
@@ -175,11 +175,7 @@ const orders = async (req, res) => {
 
         const totalOrders = await Order.countDocuments(query);
         const totalPages = Math.ceil(totalOrders / limit);
-        orders.forEach(order => {
-            order.orderItems.forEach(item => {
-                console.log('Variant image:', item.variantData?.productImage?.[0]);
-            });
-        });
+        
 
         // cart count
           const cart=await Cart.findOne({userId})
@@ -220,7 +216,7 @@ const cancelOrderItem = async (req, res) => {
         const { reason } = req.body;
 
         const order = await Order.findOne({ orderId });
-        console.log('item canceled order',order)
+       
        
         if (!order) return res.status(404).json({ success: false, message: 'Order not found' });
 
@@ -257,24 +253,10 @@ const cancelOrderItem = async (req, res) => {
       await wallet.save();
     }
 
-
-    console.log('refund amount cancel',refundAmount)
-    console.log('final amount cancel',order.finalAmount)
-    console.log('coupon decrease',order.couponDiscount)
       
 
        // --- Coupon handling ---
 const allCancelled = order.orderItems.every(i => i.status === 'Cancelled');
-
-// Coupon handling
-// if (order.couponApplied && order.couponCode && allCancelled) {
-//   await Coupon.updateOne(
-//       { code: order.couponCode },
-//       { $pull: { usedBy: { user: order.userId } } }
-//   );
-//   order.couponApplied = false;
-//   order.couponDiscount = 0;
-// }
 
 // Update order status
 if (allCancelled) {
@@ -306,7 +288,7 @@ if (allCancelled) {
 const returnOrderItem = async (req, res) => {
     try {
         const { orderId, itemId, reason } = req.body;
-        console.log('return item order data', req.body);
+    
 
         if (!reason || reason.trim() === '') {
             return res.status(400).json({ success: false, message: 'Return reason is required' });
@@ -320,7 +302,7 @@ const returnOrderItem = async (req, res) => {
 
         // Find the item in orderItems
         const item = order.orderItems.find(i => i._id.toString() === itemId);
-        console.log('item find confirming', item)
+      
         if (!item) {
             return res.status(404).json({ success: false, message: 'Order item not found' });
         }
@@ -355,7 +337,7 @@ const cancelOrder = async (req, res) => {
         const { orderId, reason } = req.body;
         
         const order = await Order.findOne({ orderId });
-        console.log('cancel order',order)
+     
 
         if (!order) {
             return res.status(404).json({ success: false, message: 'Order not found' });
@@ -378,7 +360,7 @@ const cancelOrder = async (req, res) => {
 
         const canceledItems = order.orderItems.filter((item)=>item.status=="Cancelled");
         const nonCanceledItems = order.orderItems.filter((item)=>item.status!=="Cancelled");
-         console.log('non cancel the order with single and total',nonCanceledItems)
+        
 
         if (canceledItems && canceledItems.length > 0){
             for(const item of canceledItems){
@@ -387,9 +369,9 @@ const cancelOrder = async (req, res) => {
                 refundedPrice.push(refunded)
             }
         }
-        console.log('refundedPrice',refundedPrice)
+     
          const itemRefund=refundedPrice.reduce((a,b)=>a+b,0)
-         console.log('itemrefund',itemRefund)
+      
         let refundAmount=0;
           if (canceledItems && canceledItems.length > 0){
 
@@ -399,7 +381,7 @@ const cancelOrder = async (req, res) => {
           refundAmount = order.finalAmount; 
 
          }
-      console.log('refundAmount',refundAmount)
+   
 
         if (!refundAmount || isNaN(refundAmount) || refundAmount <= 0) {
            return res.status(400).json({ success: false, message: 'Invalid refund amount calculated' });
@@ -428,25 +410,16 @@ const cancelOrder = async (req, res) => {
             wallet = new Wallet({ userId: order.userId, balance: 0, transactions: [] });
           }
 
-         console.log("Razorpay refund debug:");
-         console.log("razorpayPaymentId:", order.razorpayPaymentId);
-         console.log("refundAmount:", refundAmount);
-         console.log("amount in paise:", Math.round(refundAmount * 100));
-        
-
-
         
           if (order.paymentMethod !== 'cod' && order.razorpayPaymentId) {
   try {
     const payment = await razorpayInstance.payments.fetch(order.razorpayPaymentId);
-    console.log("Payment details:", payment);
 
     if (payment.status !== 'captured') {
       return res.status(400).json({ success: false, message: `Cannot refund, payment not captured (${payment.status})` });
     }
 
     if (payment.method === 'wallet') {
-      console.log('Skipping manual refund — Razorpay handles wallet refunds automatically.');
       order.paymentStatus = 'Refunded';
       order.refunded = true;
       await order.save();
@@ -473,7 +446,7 @@ const cancelOrder = async (req, res) => {
       receipt: `refund_${order.orderId}_${Date.now()}`
     });
 
-    console.log(' Razorpay refund processed:', refund);
+   
     order.paymentStatus = 'Refunded';
     order.refunded = true;
 
@@ -520,7 +493,7 @@ const cancelOrder = async (req, res) => {
 const returnOrder = async (req, res) => {
     try {
         const { orderId, reason } = req.body;
-        console.log('why it is not working', orderId, reason)
+     
 
         if (!reason || reason.trim() === '') {
             return res.status(400).json({ success: false, message: 'Return reason is required' });
@@ -528,15 +501,11 @@ const returnOrder = async (req, res) => {
 
 
         const order = await Order.findOne({ orderId });
-        console.log('order upadating for return', order)
+     
         if (!order) {
             return res.status(404).json({ success: false, message: 'Order not found' });
         }
 
-        // Allow return only if the order status is 'Delivered'
-        // if (order.status !== 'Delivered') {
-        //     return res.status(400).json({ success: false, message: 'Only delivered orders can be returned' });
-        // }
 
         // Update overall order status
         order.status = 'Return Request';
@@ -564,8 +533,16 @@ const returnOrder = async (req, res) => {
 
 const loadInvoice = async (req, res) => {
     try {
+
+        const userId = req.session.userId;
+            const isLoggedIn = !!userId;
+            let user = null;
+            if (isLoggedIn) user = await User.findById(userId).lean();
+        
+
+        if (!userId) return res.redirect('/login');
         const { orderId } = req.query; // /order/:orderId/invoice
-        console.log('Invoice order ID:', orderId);
+       
 
         // Find order and populate user and product details
         const order = await Order.findOne({ orderId })
@@ -585,11 +562,11 @@ const loadInvoice = async (req, res) => {
             });
         }
 
-        // Extract userFullName from populated userId
-        const userFullName = order.userId?.name || 'Customer'; // Adjust based on User schema
+        
+        const userFullName = order.userId?.name || 'Customer'; 
 
         // Define deliveryFee (customize based on business logic)
-        const deliveryFee = 50; // Example: Free delivery for orders above ₹50,000
+        const deliveryFee = 50; 
 
         // Enhance orderItems with product details (if not already included)
         order.orderItems = order.orderItems.map(item => {
@@ -601,13 +578,13 @@ const loadInvoice = async (req, res) => {
     ); 
         return{
             ...item,
-            productName: product.productName, // Adjust based on Product schema
+            productName: product.productName,
             brandName: item.product?.brand.brandName || 'Eon Forge',
-            color: variant?.colorName || 'N/A',// Optional: Include if Product schema has color
+            color: variant?.colorName || 'N/A',
             regularPrice:variant?.regularPrice,
         };
         });
-   console.log('invoice order',order)
+   
         // Pass order details to EJS
         res.render("invoice", {
             order,
@@ -703,7 +680,7 @@ const downloadInvoice = async (req, res) => {
                                 item.product.productName || "Product",
                                 item.stock || 1,
                                 `₹${(item.price || 0).toLocaleString()}`,
-                                item.discount > 0 ? `-₹${(item.discount).toLocaleString()}` : "–",
+                                item.discount > 0 ? `₹${(item.discount).toLocaleString()}` : "–",
                                 `₹${(
                                     (item.price - (item.discount || 0)) * (item.stock || 1)
                                 ).toLocaleString()}`,

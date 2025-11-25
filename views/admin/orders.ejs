@@ -190,19 +190,19 @@
           </div>
           <div class="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
             <select id="status-filter" name="status" class="px-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary w-full sm:w-auto">
-              <option value="">All Statuses</option>
-              <option value="Pending">Pending</option>
-              <option value="Processing">Processing</option>
-              <option value="Shipped">Shipped</option>
-              <option value="Delivered">Delivered</option>
-              <option value="Cancelled">Cancelled</option>
-              <option value="Return Request">Return Request</option>
-              <option value="Returned">Returned</option>
-              <option value="Rejected">Rejected</option>
+              <option value="all" <%= status === 'all' ? 'selected' : '' %>>All Statuses</option>
+              <option value="Pending" <%= status === 'Pending' ? 'selected' : '' %>>Pending</option>
+              <option value="Processing" <%= status === 'Processing' ? 'selected' : '' %>>Processing</option>
+              <option value="Shipped" <%= status === 'Shipped' ? 'selected' : '' %>>Shipped</option>
+              <option value="Delivered" <%= status === 'Delivered' ? 'selected' : '' %>>Delivered</option>
+              <option value="Cancelled" <%= status === 'Cancelled' ? 'selected' : '' %>>Cancelled</option>
+              <option value="Return Request" <%= status === 'Return Request' ? 'selected' : '' %>>Return Request</option>
+              <option value="Returned" <%= status === 'Returned' ? 'selected' : '' %>>Returned</option>
+              <option value="Rejected" <%= status === 'Rejected' ? 'selected' : '' %>>Rejected</option>
             </select>
             <select id="sort-order" name="sort" class="px-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary w-full sm:w-auto">
-              <option value="desc">Newest First</option>
-              <option value="asc">Oldest First</option>
+              <option value="desc"<%= sort ==='desc' ? 'selected' : ''%>>Newest First</option>
+              <option value="asc"<%= sort ==='asc' ? 'selected' : ''%>>Oldest First</option>
             </select>
           </div>
         </div>

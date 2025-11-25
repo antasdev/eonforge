@@ -20,7 +20,10 @@ const about = async (req,res) => {
         cartCount
     })
    } catch (error) {
-    console.log('about page error:',error)
+     res.status(500).json({
+        success: false,
+        message: "Something went wrong. Please try again later.",
+    });
    } 
 };
 
@@ -43,7 +46,10 @@ const contact = async (req,res) => {
             cartCount
         })
     } catch (error) {
-        console.log('contact page error:',error)
+       res.status(500).json({
+        success: false,
+        message: "Something went wrong. Please try again later.",
+    });
     }
     
 }
@@ -66,7 +72,10 @@ const privacyPolicy = async (req,res) => {
             cartCount
         })
     } catch (error) {
-        console.log('Privacy Policy page error:',error)
+        res.status(500).json({
+        success: false,
+        message: "Something went wrong. Please try again later.",
+    });
     }
     
 }

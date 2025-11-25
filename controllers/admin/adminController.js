@@ -40,7 +40,6 @@ const loadLogin = (req, res) => {
 const login = async (req, res) => {
     try {
         const { email, password } = req.body;
-        console.log('loginpost', req.body)
         const admin = await User.findOne({ email, isAdmin: true })
         if (!admin) {
             return res.status(401).json({ success: false, message: "Admin account not found" });
@@ -53,7 +52,6 @@ const login = async (req, res) => {
             if (passwordMatch) {
                 req.session.admin = admin._id
                 req.session.admin = true;
-                console.log('passwordmatch', admin.email)
                 return res.json({ success: true, redirectUrl: '/admin/adminDashboard' })
             } else {
                 return res.json({ message: "invalid password" })
@@ -63,7 +61,6 @@ const login = async (req, res) => {
         }
 
     } catch (error) {
-        console.log("login error", error);
         res.json({ redirectUrl: '/admin/pageError' })
     }
 }
@@ -72,14 +69,12 @@ const adminLogout = async (req, res) => {
     try {
         req.session.destroy(err => {
             if (err) {
-                console.log("Error destroying session", err);
                 return res.redirect('/admin/pageError');
                 
             }
             return res.redirect('/admin/login')
         })
     } catch (error) {
-        console.log("unexpected error during logout", error)
         res.redirect("/admin/pageError")
     }
 }
@@ -299,7 +294,6 @@ const loadDashboard = async (req, res) => {
 const getChartData = async (req, res) => {
   try {
     const { period, date } = req.query;
-    console.log('Requested period:', period, 'date:', date);
 
     if (!['yearly', 'monthly', 'weekly', 'daily'].includes(period)) {
       return res.status(400).json({ error: 'Invalid period' });
@@ -307,17 +301,7 @@ const getChartData = async (req, res) => {
 
     const metrics = await getDashboardMetrics(period, date ? date : null, date ? date : null);
 
-    console.log('Chart data:', { labels: metrics.salesLabels, values: metrics.salesData });
-    console.log('Metrics:', {
-      totalSales: metrics.totalSales,
-      salesChange: metrics.salesChange,
-      newUsersCount: metrics.newUsersCount,
-      newUsersChange: metrics.newUsersChange,
-      totalProducts: metrics.totalProducts,
-      productsChange: metrics.productsChange,
-      conversionRate: metrics.conversionRate,
-      conversionRateChange: metrics.conversionRateChange
-    });
+    
 
     res.json({
       labels: metrics.salesLabels,
@@ -340,11 +324,8 @@ const getChartData = async (req, res) => {
 const generateLedger = async (req, res) => {
   try {
     const { startDate, endDate, period:reqPeriod } = req.body;
- console.log(req.body)
- console.log("period",reqPeriod)
    
     const period = reqPeriod ;
-    console.log('Ledger Request - Period:', period, 'StartDate:', startDate, 'EndDate:', endDate);
 
  
     const metrics = (startDate && endDate)
@@ -357,7 +338,6 @@ const generateLedger = async (req, res) => {
       ? 'CUSTOM'
       : period;
 
-    console.log('Using periodLabel:', periodLabel, 'Date Range:', metrics.startDate, 'to', metrics.endDate);
 
  
     const formatDate = (date) =>

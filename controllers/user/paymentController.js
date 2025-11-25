@@ -17,7 +17,18 @@ const createRazorpayOrder = async (req, res) => {
         const userId = req.session.userId;
         const { cartItems, address, paymentMethod, subtotal, deliveryFee, totalAmount, coupon } = req.body;
 
-        console.log('create order reqbody', req.body);
+       
+
+        if(coupon){
+
+            const couponDoc = await Coupon.findOne({ code: coupon.code })
+                    
+           
+                        if (!couponDoc || !couponDoc.isActive) {
+                           return res.status(400).json({ message: "Coupon is no longer active" });
+                       }
+        }
+
 
         // Validate totalAmount
         if (!totalAmount || isNaN(totalAmount) || totalAmount <= 0) {
@@ -52,7 +63,7 @@ const createRazorpayOrder = async (req, res) => {
             receipt: `receipt_order_${Date.now()}`
         };
         const razorpayOrder = await razorpayInstance.orders.create(options);
-      console.log('createrazorpay')
+      
         // Send response to frontend
         return res.json({
             success: true,
@@ -71,17 +82,15 @@ const createRazorpayOrder = async (req, res) => {
 
 const verifyAndPlaceOrder = async (req, res) => {
     try {
-        console.log('verify order place')
+       
 
         const { razorpay_order_id, razorpay_payment_id, razorpay_signature, cartItems, address, paymentMethod, subtotal, deliveryFee, totalAmount, coupon} = req.body;
         const userId = req.session.userId;
 
-console.log('verify order place',req.body)
-console.log('verify order dborderId',razorpay_order_id)
+
 
    
-        // order making
-         // Prepare coupon details
+      
         let couponApplied = false;
         let couponDiscount = 0;
         let couponCode = null;
@@ -137,7 +146,7 @@ console.log('verify order dborderId',razorpay_order_id)
 
 // existing order
 const existingOrder = await Order.findOne({razorpayOrderId:razorpay_order_id,userId})
-   console.log('existing order',existingOrder)
+   
 
    if(existingOrder){
      await Order.findOneAndUpdate({razorpayOrderId:razorpay_order_id,userId},{paymentStatus:'Paid',status: 'Processing',razorpayPaymentId:razorpay_payment_id,'orderItems.$[].status': 'Processing'})
@@ -145,7 +154,7 @@ const existingOrder = await Order.findOne({razorpayOrderId:razorpay_order_id,use
 const newOrder = new Order({
   userId,
   orderItems,
-  address: orderAddress,  // ✅ explicitly structured
+  address: orderAddress, 
   paymentMethod,
   paymentStatus: 'Paid',
   subtotal,
@@ -160,7 +169,7 @@ const newOrder = new Order({
   couponDiscount
 });
 
-              console.log('new order',newOrder)
+           
         await newOrder.save();
         // order making
    }
@@ -176,8 +185,7 @@ const newOrder = new Order({
         hmac.update(`${razorpay_order_id}|${razorpay_payment_id}`);
         const generatedSignature = hmac.digest('hex');
 
-    console.log('generate gesture')
-    console.log('Signature comparison:', { generatedSignature, razorpay_signature });
+
 
          if (generatedSignature !== razorpay_signature) {
            await Order.findOneAndUpdate(
@@ -223,18 +231,14 @@ const paymentFailure = async (req, res) => {
         const userId = req.session.userId;
         const razorpayOrderId = req.query.razorpayOrderId;
         const reason = req.query.error || "Payment failed";
-        console.log('payment fail finding',razorpayOrderId);
-        console.log('userId',userId)
-
+ 
         if (razorpayOrderId) {
             const updatedOrder = await Order.findOneAndUpdate(
                 { razorpayOrderId ,userId},
                 { paymentStatus: 'Failed', status: 'Pending' },
                 { new: true }
             );
-            console.log('Updated order:', updatedOrder || 'No order found');
-        } else {
-            console.log('No orderId provided');
+      
         }
 
         res.render('payment-failure', { errorMessage: reason,razorpayOrderId });
@@ -254,9 +258,7 @@ const retryRazorpayOrder = async (req, res) => {
 
     // 🔍 Find the existing order
     const order = await Order.findOne({ razorpayOrderId, userId });
-    console.log('Retrying payment for order:', razorpayOrderId);
-    console.log('retryrazorpay:',order)
-    console.log('Sending address:', order.address);
+    
 
     if (!order) {
       return res.status(404).json({ success: false, message: 'Order not found' });
@@ -270,7 +272,7 @@ const retryRazorpayOrder = async (req, res) => {
     };
 
     const razorpayOrder = await razorpayInstance.orders.create(options);
-    console.log('retry orderid cahnge',razorpayOrder.id)
+ 
 
     // Update old order with new razorpay order ID and set payment back to pending
     order.razorpayOrderId = razorpayOrder.id;

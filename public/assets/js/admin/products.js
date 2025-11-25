@@ -228,6 +228,7 @@
       const productIdInput = document.getElementById("product-id");
       const variantIdInput = document.getElementById("variant-id");
       const submitBtnText = document.getElementById("submit-btn-text");
+      const submitBtn = document.getElementById("submit-btn");
       const colorVariantsContainer = document.getElementById("color-variants-container");
       const addColorVariantBtn = document.getElementById("add-color-variant");
 
@@ -602,11 +603,13 @@
         const method = productId ? "PUT" : "POST";
 
         try {
+            submitBtn.disabled = true;
+            submitBtnText.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
           const response = await fetch(url, {
             method,
             body: formData,
           });
-
+              
           const result = await response.json();
           if (response.ok && result.success) {
             Swal.fire({

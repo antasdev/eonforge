@@ -683,7 +683,7 @@
                     addBtn.innerHTML = '<div class="loading-spinner mr-2"></div>Saving...';
 
                     try {
-                        console.log('Sending form data:', data);
+                     
                         const response = await fetch('/add-address', {
                             method: 'POST',
                             headers: {
@@ -728,7 +728,7 @@
                     editBtn.innerHTML = '<div class="loading-spinner mr-2"></div>Updating...';
 
                     try {
-                        console.log('Sending form data:', data);
+                      
                         const response = await fetch('/update-address', {
                             method: 'PUT',
                             headers: {

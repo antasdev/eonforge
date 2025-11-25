@@ -44,7 +44,6 @@ const addOrUpdateCategory=async (req,res) => {
        const hasOffer = !!req.body.hasOffer;
      
         const categoryId=req.params.id; 
-        console.log(name)
         if (!name || !description){
     return res.status(400).json({error: "Name and Description are required" });
   }

@@ -1472,7 +1472,7 @@ const dbOrderId = razorpayData.order.orderId;  // Your DB order ID
 console.log('Razorpay Order Response:', razorpayData);
 console.log('Razorpay Order orderId:', razorpayOrderId);
 
-// ✅ Step 2: Configure Razorpay options
+//  Step 2: Configure Razorpay options
 const options = {
   key: razorpayKeyId,
   amount: razorpayData.order.amount,
@@ -1486,7 +1486,7 @@ const options = {
     contact: selectedAddress?.phone || ''
   },
   handler: async function (response) {
-    // ✅ Payment success — verify with backend
+    //  Payment success — verify with backend
     try {
       const confirmRes = await fetch('/payment/verify', {
         method: 'POST',

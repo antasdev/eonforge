@@ -12,35 +12,48 @@ const loadCoupon = async (req, res) => {
   try {
     const search = req.query.search || "";
     const currentPage = parseInt(req.query.page) || 1;
-     const isActive = req.query.isActive || "";  
-     const sort = req.query.sort || 'desc';
+    let isActive = req.query.status || "";  
+    const sortOrder = req.query.sort === "asc" ? 1 : -1;
     const limit = 6;
-    
     const skip = (currentPage - 1) * limit;
 
-    // Search filter
-    const searchFilter = search
-      ? { code: { $regex: search, $options: 'i' } }
-      : {};
 
-    // Fetch coupons with pagination and search
-    const coupons = await Coupon.find(searchFilter)
+    // Create filter object
+    let filter = {};
+
+    // Search filter
+    if (search) {
+      filter.code = { $regex: search, $options: "i" };
+    }
+
+    // Status filter
+    if (isActive === "true") {
+      filter.isActive = true;
+    } else if (isActive === "false") {
+      filter.isActive = false;
+    }
+
+   
+    // Fetch data
+    const coupons = await Coupon.find(filter)
       .skip(skip)
       .limit(limit)
-      .sort({ createdAt: -1 }); // Optional sorting
+      .sort({ createdOn: sortOrder });
 
     // Stats
-    const totalCoupons = await Coupon.countDocuments(searchFilter);
+    const totalCoupons = await Coupon.countDocuments(filter);
     const activeCoupons = await Coupon.countDocuments({ isActive: true });
-    const redeemedCouponsCount = await Coupon.aggregate([{$unwind:'$usedBy'},{$group:{_id:null,redeemedCount:{$sum:'$usedBy.count'}}}]);
-    const redeemedCoupons = redeemedCouponsCount[0].redeemedCount ||0;
+
+    const redeemedCouponsCount = await Coupon.aggregate([
+      { $unwind: "$usedBy" },
+      { $group: { _id: null, redeemedCount: { $sum: "$usedBy.count" } } }
+    ]);
+
+    const redeemedCoupons =
+      redeemedCouponsCount[0]?.redeemedCount || 0;
+
     const totalSavings = await Coupon.aggregate([
-      {
-        $group: {
-          _id: null,
-          total: { $sum: "$discountValue" } // Adjust this if needed
-        }
-      }
+      { $group: { _id: null, total: { $sum: "$discountValue" } } }
     ]);
 
     const totalPages = Math.ceil(totalCoupons / limit);
@@ -55,13 +68,14 @@ const loadCoupon = async (req, res) => {
       currentPage,
       totalPages,
       isActive,
-      sort
+      sort: req.query.sort || "desc",
     });
+
   } catch (error) {
-    console.log("load coupon error", error);
     res.status(500).render("errorPage", { message: "Failed to load coupons" });
   }
 };
+
 
 const addCoupons = async (req, res) => {
   try {
@@ -113,7 +127,6 @@ const updateCoupon = async (req, res) => {
       isActive,
       description,
     } = req.body;
-console.log('update coupon',req.body)
     const findCoupon = await Coupon.findById(id);
     if (!findCoupon) {
       return res.status(404).json({ success: false, message: 'Coupon not found' });

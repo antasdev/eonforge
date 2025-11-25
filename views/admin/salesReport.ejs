@@ -167,7 +167,6 @@
           <button class="lg:hidden bg-transparent border-none cursor-pointer text-xl text-gray-700 mr-4" id="openSidebar">
             <i class="fas fa-bars"></i>
           </button>
-         
         </div>
         <div class="account-wrapper relative group ml-auto">
           <button class="bg-transparent border-none cursor-pointer text-xl text-gray-700" title="Account">
@@ -188,6 +187,14 @@
         <div class="flex flex-col lg:flex-row lg:justify-between lg:items-center mb-6 gap-4">
           <h1 class="text-2xl font-semibold text-gray-800">Sales Report</h1>
           <div class="flex flex-col sm:flex-row items-start sm:items-center space-y-3 sm:space-y-0 sm:space-x-4">
+            <!-- Status Filter -->
+            <select id="status-filter" class="px-4 py-2 rounded border border-gray-300 bg-white focus:ring-2 focus:ring-primary w-full sm:w-auto">
+              <option value="all">All Status</option>
+              <option value="delivered">Delivered</option>
+              <option value="rejected">Rejected</option>
+              <option value="returnRequest">Return Request</option>
+            </select>
+            
             <select id="report-period" class="px-4 py-2 rounded border border-gray-300 bg-white focus:ring-2 focus:ring-primary w-full sm:w-auto">
               <option value="daily">Daily</option>
               <option value="weekly">Weekly</option>
@@ -195,10 +202,12 @@
               <option value="yearly">Yearly</option>
               <option value="custom">Custom Range</option>
             </select>
+            
             <div id="custom-date-range" class="hidden flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 w-full sm:w-auto">
               <input type="date" id="start-date" class="px-4 py-2 rounded border border-gray-300 focus:ring-2 focus:ring-primary w-full sm:w-auto" value="<%= new Date().toISOString().split('T')[0] %>">
               <input type="date" id="end-date" class="px-4 py-2 rounded border border-gray-300 focus:ring-2 focus:ring-primary w-full sm:w-auto" value="<%= new Date().toISOString().split('T')[0] %>">
             </div>
+            
             <button id="generate-report" class="px-4 py-2 bg-primary text-white rounded hover:bg-primary-dark transition-colors w-full sm:w-auto">
               Generate Report
             </button>
@@ -333,7 +342,7 @@
                   <% }) %>
                 <% } else { %>
                   <tr>
-                    <td colspan="8" class="px-4 py-3 text-center text-gray-500">No sales data available for the selected period.</td>
+                    <td colspan="9" class="px-4 py-3 text-center text-gray-500">No sales data available for the selected period.</td>
                   </tr>
                 <% } %>
               </tbody>
@@ -344,6 +353,6 @@
     </div>
   </div>
   
-  <script src="/assets/js/admin/salesReport.js"></script>
+<script src="/assets/js/admin/salesReport.js"></script>
 </body>
 </html>

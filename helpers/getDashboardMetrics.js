@@ -66,7 +66,7 @@ const getDashboardMetrics = async (period = 'monthly', customStartDate = null, c
     }
   }
 
-  console.log('Date ranges:', { startDate: startDate.toISOString(), endDate: endDate.toISOString(), prevStartDate: prevStartDate.toISOString(), prevEndDate: prevEndDate.toISOString() });
+ 
 
   // Helper function for aggregation with delivered items
   const aggregateDelivered = async (pipeline) => {

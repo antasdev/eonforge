@@ -1,4 +1,4 @@
-    document.addEventListener('DOMContentLoaded', () => {
+   document.addEventListener('DOMContentLoaded', () => {
       // Sidebar functionality
       const sidebar = document.getElementById('sidebar');
       const sidebarOverlay = document.getElementById('sidebarOverlay');
@@ -37,6 +37,7 @@
 
       // Sales report functionality
       const reportPeriod = document.getElementById('report-period');
+      const statusFilter = document.getElementById('status-filter');
       const customDateRange = document.getElementById('custom-date-range');
       const startDate = document.getElementById('start-date');
       const endDate = document.getElementById('end-date');
@@ -44,38 +45,41 @@
       const downloadPdfBtn = document.getElementById('download-pdf');
       const downloadExcelBtn = document.getElementById('download-excel');
       const salesTableBody = document.getElementById('sales-table-body');
+      
       // Set max attribute for start and end date inputs to today
-  const today = new Date().toISOString().split('T')[0];
-  startDate.setAttribute('max', today);
-  endDate.setAttribute('max', today);
+      const today = new Date().toISOString().split('T')[0];
+      startDate.setAttribute('max', today);
+      endDate.setAttribute('max', today);
 
-  // Set initial min attribute for end-date based on start-date
-  if (startDate.value) {
-    endDate.setAttribute('min', startDate.value);
-  }
+      // Set initial min attribute for end-date based on start-date
+      if (startDate.value) {
+        endDate.setAttribute('min', startDate.value);
+      }
 
-  // Update end-date's min attribute when start-date changes
-  startDate.addEventListener('change', () => {
-    endDate.setAttribute('min', startDate.value);
-    // If end-date is before start-date, reset it to start-date
-    if (endDate.value && new Date(endDate.value) < new Date(startDate.value)) {
-      endDate.value = startDate.value;
-    }
-  });
+      // Update end-date's min attribute when start-date changes
+      startDate.addEventListener('change', () => {
+        endDate.setAttribute('min', startDate.value);
+        // If end-date is before start-date, reset it to start-date
+        if (endDate.value && new Date(endDate.value) < new Date(startDate.value)) {
+          endDate.value = startDate.value;
+        }
+      });
 
-  // Toggle custom date range visibility
-  reportPeriod.addEventListener('change', () => {
-    customDateRange.classList.toggle('hidden', reportPeriod.value !== 'custom');
-    // Ensure end-date min is updated when custom range is selected
-    if (reportPeriod.value === 'custom' && startDate.value) {
-      endDate.setAttribute('min', startDate.value);
-    }
-  });
+      // Toggle custom date range visibility
+      reportPeriod.addEventListener('change', () => {
+        customDateRange.classList.toggle('hidden', reportPeriod.value !== 'custom');
+        // Ensure end-date min is updated when custom range is selected
+        if (reportPeriod.value === 'custom' && startDate.value) {
+          endDate.setAttribute('min', startDate.value);
+        }
+      });
 
       // Generate report on button click
       generateReportBtn.addEventListener('click', async () => {
         const period = reportPeriod.value;
-        const params = new URLSearchParams({ period });
+        const status = statusFilter.value;
+        const params = new URLSearchParams({ period, status });
+        
 
         if (period === 'custom') {
           const start = startDate.value;
@@ -158,7 +162,7 @@
           } else {
             salesTableBody.innerHTML = `
               <tr>
-                <td colspan="8" class="px-4 py-3 text-center text-gray-500">
+                <td colspan="9" class="px-4 py-3 text-center text-gray-500">
                   No sales data available for the selected period.
                 </td>
               </tr>
@@ -189,7 +193,8 @@
       // Download PDF
       downloadPdfBtn.addEventListener('click', async () => {
         const period = reportPeriod.value;
-        const params = new URLSearchParams({ period });
+        const status = statusFilter.value;
+        const params = new URLSearchParams({ period, status });
 
         if (period === 'custom') {
           const start = startDate.value;
@@ -224,7 +229,8 @@
       // Download Excel
       downloadExcelBtn.addEventListener('click', async () => {
         const period = reportPeriod.value;
-        const params = new URLSearchParams({ period });
+        const status = statusFilter.value;
+        const params = new URLSearchParams({ period, status });
 
         if (period === 'custom') {
           const start = startDate.value;

@@ -519,7 +519,7 @@
                 return;
             }
             
-   console.log('delivery fee',deliveryFee)
+   
             const subtotal = cartItems.reduce((sum, item) => sum + item.total, 0);
             const total = subtotal+deliveryFee;
             const totalItems =cartItems.filter(item => item.status !== 'Blocked')

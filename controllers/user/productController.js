@@ -35,7 +35,6 @@ const loadProductDetail = async (req, res) => {
     const productId = req.params.id
     const variantId = req.query.variant;
 
-    console.log('hello variant', variantId)
 
     const brands = await Brand.find({ isBlocked: false }).lean();
     const categories = await Category.find({ isListed: true }).lean();
@@ -69,7 +68,6 @@ const loadProductDetail = async (req, res) => {
       );
       cartQuantity = item ? item.stock : 0;
     }
-    console.log('cart quantity in product detail', cartQuantity)
     let isInCart = false;
     if (cart) {
       const item = cart.items.find((value) =>
@@ -81,7 +79,6 @@ const loadProductDetail = async (req, res) => {
         isInCart = true;
       }
     }
-console.log('product detail page offer  setting',product)
 
     const sameBrandProducts = await Product.find({
       brand: product.brand._id,
@@ -91,9 +88,7 @@ console.log('product detail page offer  setting',product)
     .populate('category')
       .limit(5);
 
-      console.log('brand detail page offer  setting',sameBrandProducts)
       
-      console.log('cart detail', cart);
       
       let cartCount = 0;
       
@@ -204,7 +199,6 @@ const loadWallet = async (req, res) => {
     const isKycVerified = user.kycVerified || false;
     const walletLocked = user.walletLocked || false;
     const availableWithdrawal = walletLocked ? 0 : walletBalance;
-console.log('kyc verified with load wallet',isKycVerified)
     res.render('wallet', {
       user,
       isLoggedIn,
@@ -228,7 +222,6 @@ console.log('kyc verified with load wallet',isKycVerified)
 
 const addFunds = async (req, res) => {
     try {
-      console.log('adding fund from user',req.body)
         const { amount, paymentMethod } = req.body;
           const user = await User.findById(req.session.userId);
         const userId = req.session.userId;
@@ -316,17 +309,14 @@ const verifyAddFunds = async (req, res) => {
     try {
         const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
         const userId = req.session.userId;
-        console.log('verifying added fund', { userId, razorpay_order_id, razorpay_payment_id, razorpay_signature });
 
         // Validate user
         if (!userId) {
-            console.log('User not authenticated');
             return res.status(401).json({ success: false, message: 'User not authenticated' });
         }
 
         // Validate Razorpay details
         if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
-            console.log('Missing Razorpay payment details', { razorpay_order_id, razorpay_payment_id, razorpay_signature });
             return res.status(400).json({ success: false, message: 'Missing Razorpay payment details' });
         }
 
@@ -335,10 +325,8 @@ const verifyAddFunds = async (req, res) => {
         const hmac = crypto.createHmac('sha256', process.env.RAZORPAY_KEY_SECRET);
         hmac.update(`${razorpay_order_id}|${razorpay_payment_id}`);
         const generatedSignature = hmac.digest('hex');
-        console.log('Signature verification', { received: razorpay_signature, generated: generatedSignature });
 
         if (generatedSignature !== razorpay_signature) {
-            console.log('Signature verification failed');
             return res.status(400).json({ success: false, message: 'Signature verification failed' });
         }
 
@@ -351,7 +339,6 @@ const verifyAddFunds = async (req, res) => {
         // Find pending transaction
         const pendingTx = wallet.transactions.find(tx => tx.status === 'pending' && tx.type === 'credit');
         if (!pendingTx) {
-            console.log('No pending transaction found');
             return res.status(400).json({ success: false, message: 'No pending transaction found' });
         }
 
@@ -359,7 +346,6 @@ const verifyAddFunds = async (req, res) => {
         wallet.balance += pendingTx.amount;
         pendingTx.status = 'success';
         await wallet.save();
-        console.log('Wallet updated', { walletBalance: wallet.balance, transactionId: pendingTx._id });
 
         // Return updated wallet data
         res.json({

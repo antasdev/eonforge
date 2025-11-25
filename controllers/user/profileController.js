@@ -61,11 +61,9 @@ const forgotPassword = async (req, res) => {
     if (findUser) {
       const otp = generateOtp();
       const emailSent = await sendVerificationEmail(email, otp);
-      console.log('hello i am here', email)
       if (emailSent) {
         req.session.email = email;
         req.session.otp = otp;
-        console.log('OTP :', otp)
         req.session.otpExpiresAt = Date.now() + 5 * 60 * 1000; // 5 minutes expiry
         req.session.resendOtpAllowedAt = Date.now() + 60 * 1000;
         return res.json({ success: true, redirectUrl: '/forgotPassword-otp' });
@@ -125,7 +123,6 @@ const forgotResendOtp = async (req, res) => {
 
     const resendOtpAllowedAt = req.session.resendOtpAllowedAt;
     if (resendOtpAllowedAt && Date.now() < resendOtpAllowedAt) {
-      console.log('otpexp', otpExpiresAt)
       const secondsLeft = Math.ceil((resendOtpAllowedAtt - Date.now()) / 1000);
       return res.status(429).json({
         success: false,
@@ -139,7 +136,6 @@ const forgotResendOtp = async (req, res) => {
     if (emailSent) {
       req.session.otp = otp;
       req.session.otpExpiresAt = Date.now() + 5 * 60 * 1000; // Set to 5 minutes
-      console.log('Resend OTP:', otp);
       return res.status(200).json({ success: true, message: 'OTP resent successfully.' });
     } else {
       return res.status(500).json({ success: false, message: 'Failed to resend OTP. Please try again.' });
@@ -209,13 +205,10 @@ const userProfile = async (req, res) => {
 if (cart && cart.items) {
   cartCount = cart.items.length;
 }
-console.log('cart count', cartCount);
  
-console.log('totalspent', totalSpent);
 
-console.log('user order count:', orderCount);
 
- console.log('user profile order count',order)
+
     const walletBalance=100000
     res.render('profile', {
       user,
@@ -228,7 +221,6 @@ console.log('user order count:', orderCount);
       walletBalance
     })
   } catch (error) {
-    console.log(error)
     res.redirect('/pageNotFound')
   }
 
@@ -286,8 +278,7 @@ const editProfile = async (req, res) => {
       return res.status(401).json({ success: false, message: 'Please log in to update your profile.' });
     }
 
-    // console.log('Request Body:', req.body);
-    // console.log('Uploaded File:', req.file);
+
 
     const { firstName, lastName, email, phone, dob, bio } = req.body;
 
@@ -322,11 +313,11 @@ const editProfile = async (req, res) => {
     );
 
     if (!updatedUser) {
-      console.log('User not found');
+      
       return res.status(404).json({ success: false, message: 'User not found.' });
     }
 
-    console.log('Updated User:', updatedUser);
+    
 
     // Send email notification if email changed
     if (email?.trim() && email !== updatedUser.email) {
@@ -372,7 +363,6 @@ const changeEmailvalid = async (req, res) => {
       const emailSent = await sendVerificationEmail(email, otp);
       if (emailSent) {
         req.session.otp = otp;
-        console.log('OTP', otp);
         req.session.userData = req.body;
         req.session.email = email;
 
@@ -461,7 +451,7 @@ const updateEmail = async (req, res) => {
       req.session.otpExpiresAt = Date.now() + 2 * 60 * 1000; // 2 minutes
       req.session.newEmail = newEmail;
 
-      console.log('OTP:', otp);
+ 
       return res.json({ success: true, redirectUrl: '/change-newEmail-otp' });
     } else {
       return res.json({ success: false, message: 'Failed to send OTP. Please try again.' });
@@ -504,7 +494,7 @@ const changeNewEmailOtp = async (req, res) => {
     }
 
     await User.findByIdAndUpdate(userId, { email: newEmail });
-     console.log('new email added',)
+  
     // Clean up session
     req.session.otp = null;
     req.session.otpExpiresAt = null;
@@ -513,7 +503,6 @@ const changeNewEmailOtp = async (req, res) => {
     return res.json({ success: true, redirectUrl: '/editProfile', message: 'Email updated successfully.' });
 
   } catch (error) {
-    console.error('Error verifying new email OTP:', error);
     return res.status(500).json({ success: false, message: 'An error occurred. Please try again.' });
   }
 };
@@ -525,7 +514,7 @@ const changePassword = async (req, res) => {
     const { currentPassword, newPassword, confirmPassword } = req.body;
     const userId = req.session.userId;
 
-    console.log('is it store in', req.body)
+    
 
     // Check if user is logged in
     if (!userId) {
@@ -590,7 +579,6 @@ const addAddress = async (req, res) => {
     res.render('add-address', { user, isLoggedIn, address ,cartCount})
 
   } catch (error) {
-    console.log('address management error', error)
     res.redirect('/pageNotFound')
   }
 
@@ -604,7 +592,6 @@ const postAddAddress = async (req, res) => {
     }
 
     const { type, street, city, state, pin, country, phone, isDefault } = req.body;
-    console.log('Received form data:', req.body);
 
     // Validate required fields
     if (!type || !street || !city || !state || !pin || !country || !phone) {
@@ -623,7 +610,6 @@ const postAddAddress = async (req, res) => {
 
     const userAddress = await Address.findOne({ userId });
     const newAddress = { type, street, city, state, pin, country, phone, isDefault: isDefault === 'on' };
-    console.log('New address:', newAddress);
     
 
     if (userAddress) {
@@ -645,11 +631,9 @@ const postAddAddress = async (req, res) => {
 
 const updateAddress = async (req, res) => {
   const userId = req.session.userId; 
-  console.log('userId is:', userId);
 
   try {
     const { id, editType, street, city, state, pin, country, phone, isDefault } = req.body;
-    console.log('this is req.body:', req.body);
 
 
     if (!id || !editType) {
@@ -659,19 +643,16 @@ const updateAddress = async (req, res) => {
    
     const user = await Address.findOne({ _id: id});
     if (!user) {
-      console.log('User not found for id:', id, 'and userId:', userId);
       return res.status(404).json({ message: 'User not found or unauthorized' });
     }
 
  
     const address = user.address.find(addr => addr.type === editType);
     if (!address) {
-      console.log(`No address found with type: ${editType}`);
       return res.status(404).json({ message: `Address with type "${editType}" not found` });
     }
 
-    console.log('finding type address:', address);
-    console.log('address_id:', address._id.toString());
+  
 
     
     const updateFields = {
@@ -699,11 +680,9 @@ const updateAddress = async (req, res) => {
     );
 
     if (!updatedUser) {
-      console.log('Failed to update address for address_id:', address._id);
       return res.status(500).json({ message: 'Failed to update address' });
     }
 
-    console.log('Updated user:', updatedUser);
     res.status(200).json({ message: 'Address updated successfully', user: updatedUser });
   } catch (error) {
     console.error('Error in updateAddress:', error);
@@ -715,15 +694,13 @@ const updateAddress = async (req, res) => {
         const { userId ,addressId} = req.body; 
         const sessionUserId = req.session.userId; 
 
-        console.log('hello delete reqbody', req.body); 
-  console.log('come from session',sessionUserId)
+       
       
         const updatedUser = await Address.findOneAndUpdate(
             { _id: userId },
             { $pull: { address: { _id: addressId } } },
             { new: true }
         );
-    console.log('updatedelete where',updatedUser)
         if (!updatedUser) {
             return res.status(404).json({ message: 'User or address not found' });
         }

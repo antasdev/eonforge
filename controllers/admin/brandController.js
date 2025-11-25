@@ -47,7 +47,6 @@ const addBrand = async (req,res) => {
             return res.json({success:false,message:'Brand already exists'}) 
         }
            const image = req.file ? req.file.path : null;
-           console.log('image brand',image)
 
     if (!brandName || !image) {
       return res.json({ success: false, message: 'Brand name and image are required.' });

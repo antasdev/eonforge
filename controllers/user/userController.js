@@ -42,26 +42,16 @@ const loadHomePage = async (req, res) => {
     const isLoggedIn = !!userId;
     let user = null;
     if (isLoggedIn) user = await User.findOne({_id:userId,isBlocked:false})
-      console.log(user)
+  
 
-    // let sameBrandProducts = [];
-    // if (p && p.brand) {
-    //   sameBrandProducts = await Product.find({
-    //     brand: p.brand,
-    //     _id: { $ne: p._id },
-    //     isBlocked: false
-    //   }).lean();
-    // }
     const cart = await Cart.findOne({ userId });
-console.log('cart detail', cart);
+
 
 let cartCount = 0;
 
 if (cart && cart.items) {
   cartCount = cart.items.length;
 }
-
-console.log('cart detail count', cartCount);
 
     return res.render('home', {
       isLoggedIn,
@@ -83,7 +73,7 @@ const loadSignup = async (req, res) => {
   try {
     return res.render('signup', { message: 'null', title: 'Sign Up - EON FORGE' });
   } catch (error) {
-    console.log('Home page not loading:', error);
+  
     res.status(500).send("Server Error ")
   }
 }
@@ -118,7 +108,7 @@ async function sendVerificationEmail(email, otp) {
       text: `Your OTP is ${otp}`,
       html: `<p>your OTP is:<strong> ${otp}</strong></p>`,
     })
-    //  console.log('Mail info:',info)
+  
     return info.accepted.length > 0
 
 
@@ -183,7 +173,7 @@ const signup = async (req, res) => {
     req.session.otpExpiresAt = Date.now() + 60 * 1000;
     req.session.userData = { lastName, firstName, email, password,referralCode }
 
-    console.log('OTP sent', otp)
+ 
 
     return res.json({ success: true, redirectUrl: "/verify-otp" })
 
@@ -212,7 +202,7 @@ const securePassword = async (password) => {
 const verifyOtp = async (req, res) => {
   try {
     const { otp } = req.body
-    // console.log(req.body)
+ 
     if (otp == req.session.userOtp) {
       const user = req.session.userData
       const passwordHash = await securePassword(user.password);
@@ -238,7 +228,7 @@ const verifyOtp = async (req, res) => {
       req.session.userId = saveUserData._id;
 
       req.session.save(() => {
-        console.log('Session saved:', req.session.userId);
+        
         res.json({ success: true, redirectUrl: '/' });
       });
 
@@ -256,7 +246,7 @@ const resendOtp = async (req, res) => {
   try {
 
     const userData = req.session.userData
-    console.log(userData)
+   
     const otpExpiresAt = req.session.otpExpiresAt;
     if (!userData || !userData.email) {
       return res.status(400).json({ success: false, message: 'Email not found in session' })
@@ -281,7 +271,7 @@ const resendOtp = async (req, res) => {
 
     const emailSent = await sendVerificationEmail(email, otp);
     if (emailSent) {
-      console.log('Resend OTP :', otp);
+    
       res.status(200).json({ success: true, message: 'OTP Resend Succeccfully' })
 
     } else {
@@ -303,7 +293,6 @@ const loadLogin = async (req, res) => {
       return res.redirect('/');
     }
   } catch (error) {
-    console.log('Login page load error:', error);
     return res.redirect('/pageNotFound');
   }
 };
@@ -314,7 +303,7 @@ const login = async (req, res) => {
   try {
 
     const { email, password, googleId } = req.body;
-    console.log("google id is this:", email)
+    
 
     let findUser;
     if (googleId) {
@@ -322,7 +311,7 @@ const login = async (req, res) => {
       
       if (!findUser) {
         findUser = new User({ email: email, googleId: googleId, isBlocked: false })
-        console.log('googleid from login', findUser.googleId)
+    
         await findUser.save();
       }
       if (!findUser.googleId) {
@@ -369,18 +358,20 @@ const login = async (req, res) => {
 
 const logout = async (req, res) => {
   try {
-    console.log("Before destroy:", req.session);
+
     req.session.destroy((err) => {
       if (err) {
-        console.log("Session destruction error", err.message);
+        return res.status(500).render("pageNotFound", {
+            message: "Failed to log you out. Please try again."
+        });
       }
 
-      res.clearCookie('connect.sid'); // 👈 Clear cookie manually
+      res.clearCookie('connect.sid'); 
       res.redirect('/login');
 
     })
   } catch (error) {
-    console.log('Logout error', error)
+    
     res.redirect('/pageNotFound')
   }
 }
@@ -398,11 +389,9 @@ const loadShopPage = async (req, res) => {
     const page = parseInt(req.query.page) || 1;
     const limit = 6;
     const skip = (page - 1) * limit;
-
     const userId = req.session.userId;
     const isLoggedIn = !!userId;
     const user = isLoggedIn ? await User.findOne({_id:userId,isBlocked:false}) : null;
-   console.log('serach product why not coming',search)
     let wishlistProductIds = [];
     if (isLoggedIn) {
       const wishlist = await Wishlist.findOne({ userId }).lean();
@@ -417,7 +406,6 @@ const loadShopPage = async (req, res) => {
         cartProduct = existCart.items.map(item => item.productId.toString());
       }
     };
-    console.log('adding cart',cartProduct)
 
     // Ensure brands and categories are arrays
     if (!Array.isArray(selectedBrands)) selectedBrands = selectedBrands ? [selectedBrands] : [];
@@ -426,8 +414,7 @@ const loadShopPage = async (req, res) => {
     // Fetch all brands and categories for the template
     const brands = await Brand.find({ isBlocked: false }).lean();
     const categories = await Category.find({ isListed: true }).lean();
-    console.log('brand blocking fine', brands)
-    console.log('category blocking fine', categories)
+   
 
     // Build query
     let query = { isBlocked: false, 'colorVariants.stock': { $gt: 0 } };
@@ -482,11 +469,11 @@ const loadShopPage = async (req, res) => {
   product.selectedVariant = product.colorVariants[0]; // first variant as default
   return product;
 });
-   console.log('the category is get in this page are you sure',filteredProducts)
+   
     const totalProducts = await Product.countDocuments(query);
     const totalPages = Math.ceil(totalProducts / limit);
     const cart = await Cart.findOne({ userId });
-console.log('cart detail', cart);
+
 
 let cartCount = 0;
 
@@ -551,10 +538,7 @@ const filterProducts = async (req, res) => {
     const page = parseInt(req.query.page) || 1;
     const limit = 6;
     const skip = (page - 1) * limit;
-    console.log(selectedBrands)
-  console.log('serach product why  coming',search)
-    console.log('sorting answer', req.query.sort)
-    console.log('sorting answer', sort)
+   
 
 
 
@@ -591,8 +575,7 @@ const filterProducts = async (req, res) => {
       ];
     }
 
-    //  console.log('minprice',minPrice)
-    //  console.log('maxprice',maxPrice)
+
 
     if (minPrice || maxPrice) {
       query['colorVariants.offerPrice'] = {};
@@ -640,7 +623,7 @@ products.forEach(product => {
 
 
 
-    console.log('filter', filteredProducts)
+
 
     const totalProducts = await Product.countDocuments(query);
     const totalPages = Math.ceil(totalProducts / limit);

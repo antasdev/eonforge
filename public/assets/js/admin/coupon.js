@@ -5,6 +5,7 @@
       const openSidebarBtn = document.getElementById('openSidebar');
       const closeSidebarBtn = document.getElementById('closeSidebar');
       
+      
       if (openSidebarBtn && sidebar && sidebarOverlay && closeSidebarBtn) {
         openSidebarBtn.addEventListener('click', () => {
           sidebar.classList.remove('-translate-x-full');
@@ -20,9 +21,19 @@
           sidebar.classList.add('-translate-x-full');
           sidebarOverlay.classList.remove('active');
         });
-      } else {
+      } else {                                      
         console.error('Sidebar elements not found');
       }
+
+      function applyFilters(){
+        const status = document.getElementById('isActive-filter').value;
+        const sort = document.getElementById('sort-order').value;
+         const search = document.querySelector('input[name="search"]').value;
+        window.location.href = `/admin/coupon?search=${encodeURIComponent(search)}&status=${status}&sort=${sort}`;
+      }
+
+      document.getElementById('isActive-filter').addEventListener('change',applyFilters);
+      document.getElementById('sort-order').addEventListener('change',applyFilters);
 
       // Initialize Inline Validation
       addInlineValidation('create');

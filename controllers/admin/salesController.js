@@ -25,13 +25,9 @@ const loadSalesReport = async (req, res) => {
 
     ]);
     const totalDiscount = revenueResult[0]?.discountResult || 0;
-    console.log('total discount value', totalDiscount)
-
     const totalOrderAmount = revenueResult[0]?.totalOrderAmount || 0;
-    console.log('totalamount value', totalOrderAmount)
-    
     const totalItemsSold=revenueResult[0]?.itemsSold ||0;
-    console.log('total item sold', totalItemsSold)
+    
 
 
     
@@ -47,7 +43,7 @@ const loadSalesReport = async (req, res) => {
        const grossSales = orderList.reduce((sum, order) => sum + order.orderItems.reduce((a, b) => a + b.price * b.stock, 0), 0);
     
     const netRevenue = orderList.reduce((sum, order) => sum + order.orderItems.reduce((a, b) => a + (b.price - b.discount) * b.stock, 0), 0);
-    console.log('customer name', orderList)
+  
 
     // Format data for report
     const formattedOrders = orderList.map(order => ({
@@ -64,7 +60,7 @@ const loadSalesReport = async (req, res) => {
       finalAmount: order.finalAmount || 0
     }));
 
-    console.log('all data from formattdOrders', formattedOrders)
+   
 
     // === 3. Prepare Sales Data ===
     const salesData = {
@@ -80,7 +76,7 @@ const loadSalesReport = async (req, res) => {
     res.render("salesReport", { salesData });
 
   } catch (error) {
-    console.log("loading sales report error:", error);
+    
     res.status(500).send("Error loading sales report");
   }
 };
@@ -88,13 +84,21 @@ const loadSalesReport = async (req, res) => {
 const filterSalesReport=async (req,res) => {
    try {
         
-     const { period, startDate, endDate } = req.query;
-     console.log('type',req.query)
+     const { period, startDate, endDate,status } = req.query;
+  
+    let matchQuery = {}
+    const statusMap={
+       delivered: ["Delivered"],
+       returnRequest: ["Return Request"],
+       rejected: ["Rejected"],
+       all: ["Delivered", "Return Request", "Rejected"]
+         }
 
+     
     // Build query
-   const matchQuery = { status:{$in:['Delivered','Return Request','Rejected']}};
-
-const now = new Date();
+      matchQuery = { status:{ $in: statusMap[status] || statusMap.all }};
+       
+     const now = new Date();
 
 if (period === 'custom' && startDate && endDate) {
   matchQuery.createdOn = {
@@ -162,7 +166,7 @@ if (period === 'custom' && startDate && endDate) {
       couponDiscount: order.couponDiscount || 0,
       finalAmount: order.finalAmount || 0
     }));
-    console.log('sales data',salesData)
+   
 
     res.json({
       grossSales,
@@ -182,8 +186,18 @@ if (period === 'custom' && startDate && endDate) {
 const downloadSalesReport = async (req, res) => {
   try {
     const { type } = req.params;   
-    const { period, startDate, endDate } = req.query;
-    const matchQuery = { status: {$in:['Delivered','Return Request','Rejected']} };
+    const { period, startDate, endDate,status } = req.query;
+     let matchQuery = {}
+    const statusMap={
+       delivered: ["Delivered"],
+       returnRequest: ["Return Request"],
+       rejected: ["Rejected"],
+       all: ["Delivered", "Return Request", "Rejected"]
+         }
+
+         
+    // Build query
+      matchQuery = { status:{ $in: statusMap[status] || statusMap.all }};
 
     const now = new Date();
 
@@ -248,6 +262,11 @@ const downloadSalesReport = async (req, res) => {
         `Period: ${period === 'custom' ? `${startDate} to ${endDate}` : period.charAt(0).toUpperCase() + period.slice(1)}`,
         { align: 'center' }
       );
+      doc.fontSize(12).fillColor('black').text(
+        `Status: ${status.charAt(0).toUpperCase() + status.slice(1)}`,
+        { align: 'center' }
+      );
+
       doc.text(`Generated on: ${new Date().toLocaleDateString("en-IN")}`, { align: 'center' });
       doc.moveDown(2);
 

@@ -31,6 +31,7 @@
         const status = document.getElementById('status-filter').value;
         const sort = document.getElementById('sort-order').value;
         const search = document.querySelector('input[name="search"]').value;
+        
         window.location.href = `/admin/orders?search=${encodeURIComponent(search)}&status=${status}&sort=${sort}`;
       }
 

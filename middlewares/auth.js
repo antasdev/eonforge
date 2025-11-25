@@ -13,7 +13,7 @@ const userAuth = (req, res, next) => {
 
                 })
                 .catch(error => {
-                    console.log('Error in user auth middleware', error)
+                
                     res.status(500).send('Internal server error')
                 })
         } else {
@@ -23,10 +23,10 @@ const userAuth = (req, res, next) => {
 
 
 const isLogin = async(req, res, next) => {
-    console.log(req.session.userId)
+    
     const user = await User.findOne({_id:req.session.userId,isBlocked:false})
     if (user) {
-        console.log('hello sesssion1')
+       
         return res.redirect('/');
     }
     next();
@@ -50,9 +50,9 @@ const adminAuth = (req, res, next) => {
 
 
 const adminLogin = (req, res, next) => {
-    console.log('is login called')
+    
     if (req.session.admin) {
-        console.log('hello sesssion1')
+   
         return res.redirect('/admin/adminDashboard');
     }
     next();

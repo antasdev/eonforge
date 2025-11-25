@@ -99,9 +99,13 @@
                 <a href="/cart" class="relative flex flex-col items-center text-black hover:text-accent">
                     <div class="relative">
                         <i class="fas fa-shopping-bag text-lg mb-1"></i>
-                        <% if (cartCount && cartCount > 0) { %>
-                            <span id="cartCountBadge" class="absolute -top-2 -right-3 bg-red-600 text-white text-[10px] font-semibold rounded-full px-1.5 py-0.5"><%= cartCount %></span>
-                        <% } %>
+                        <span 
+                            id="cartCountBadge" 
+                            class="absolute -top-2 -right-3 bg-red-600 text-white text-[10px] font-semibold rounded-full px-1.5 py-0.5 
+                            <%= cartCount && cartCount > 0 ? '' : 'hidden' %>">
+                            <%= cartCount || 0 %>
+                        </span>
+
                     </div>
                     <span class="text-xs hidden sm:block">Cart</span>
                 </a>

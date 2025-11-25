@@ -42,11 +42,10 @@ app.use('/admin', errorController.pageError);
 app.use('/', errorController.pageNotFound); 
 
 
+app.listen(process.env.PORT, '0.0.0.0', () => {
+  console.log('Server running on http://127.0.0.1:3005');
+});
 
-
-app.listen(process.env.PORT, () => {
-    console.log('server running');
-})
 
 
 

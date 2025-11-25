@@ -40,6 +40,11 @@ const couponSchema = new mongoose.Schema({
         type: String,
         required: false
     },
+    createdOn: {
+        type: Date,
+        default: Date.now,
+        required: true
+    },
    usedBy: [{
   user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
   count: { type: Number, default: 1 } // how many times this user has used it

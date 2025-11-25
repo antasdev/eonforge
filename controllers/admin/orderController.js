@@ -21,6 +21,7 @@ const loadOrders = async (req, res) => {
       ];
     }
     if (status) query.status = status;
+    if(status=='all')query={};
 
     const pendingOrders = await Order.countDocuments({ status: 'Pending' });
     const returnRequests = await Order.countDocuments({ status: 'Return Request' });
@@ -102,11 +103,9 @@ const loadOrderDetail = async (req, res) => {
     }
 order.paymentStatus = order.paymentStatus || 'Pending';
 
-    console.log('Order after status check:', order);
 
     res.render('order-list', { order });
   } catch (err) {
-    console.log('Error loading order details:', err);
     res.status(500).send('Server Error');
   }
 };
@@ -118,8 +117,6 @@ const updateOrderStatus = async (req, res) => {
   const { orderId } = req.params;
   const { status } = req.body;
 
-  console.log('Order ID:', orderId);
-  console.log('New Status:', status);
 
   try {
     const order = await Order.findById(orderId);
@@ -128,15 +125,12 @@ const updateOrderStatus = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Order not found' });
     }
 
-    console.log('Old Order Status:', order.status);
     order.status = status;
 
     if (Array.isArray(order.orderItems)) {
       order.orderItems.forEach((item, index) => {
-        console.log(`Item ${index + 1} - Current Status: ${item.status}`);
         if (item.status !== 'Cancelled'&& item.status !=='Returned'&& item.status !=='Rejected') {
           item.status = status;
-          console.log(`Item ${index + 1} - Updated to: ${item.status}`);
         }
       });
     }
@@ -144,8 +138,7 @@ if (order.paymentMethod.toLowerCase() === 'cod' && order.status=== 'Delivered') 
     order.paymentStatus = 'Paid';
     
 }
-console.log('when after checking',order.status)
-console.log('when after checking', order.paymentStatus)
+
     await order.save(); 
 
     res.json({ success: true, message: 'Order status updated successfully' });
@@ -160,12 +153,11 @@ const verifyReturnRequest = async (req, res) => {
   const { orderId } = req.params;
   const { approved } = req.body;
 
-  console.log('verify return', req.body);
-  console.log('verify return', req.params);
+  
 
   try {
     const order = await Order.findOne({ orderId });
-    console.log('order getting', order);
+ 
 
     if (!order) {
       return res.status(404).json({ success: false, message: 'Order not found' });
@@ -185,7 +177,7 @@ const verifyReturnRequest = async (req, res) => {
 
         const returnedItems = order.orderItems.filter((item)=>item.status=="Returned");
         const nonReturnedItems = order.orderItems.filter((item)=>item.status!=="Returned");
-         console.log('non cancel the order with single and total',nonReturnedItems)
+         
 
         if (returnedItems && returnedItems.length > 0){
             for(const item of returnedItems){
@@ -194,9 +186,9 @@ const verifyReturnRequest = async (req, res) => {
                 refundedPrice.push(refunded)
             }
         }
-        console.log('refundedPrice',refundedPrice)
+       
          const itemRefund=refundedPrice.reduce((a,b)=>a+b,0)
-         console.log('itemrefund',itemRefund)
+        
         let refundAmount=0;
           if (returnedItems && returnedItems.length > 0){
 
@@ -206,7 +198,7 @@ const verifyReturnRequest = async (req, res) => {
           refundAmount = order.finalAmount; 
 
          }
-      console.log('refundAmount',refundAmount)
+     
 
         if (!refundAmount || isNaN(refundAmount) || refundAmount <= 0) {
            return res.status(400).json({ success: false, message: 'Invalid refund amount calculated' });
@@ -250,7 +242,7 @@ const verifyReturnRequest = async (req, res) => {
         speed: 'normal',
         receipt: `refund_${order.orderId}_${Date.now()}`
       });
-      console.log('Razorpay refund processed:', refund);
+ 
     } catch (refundError) {
       console.error('Razorpay refund error:', refundError);
       if (refundError.statusCode === 400 && refundError.error.description.includes('fully refunded already')) {

@@ -29,7 +29,7 @@ const loadCheckout = async (req, res) => {
     try {
         const userId = req.session.userId;
         if (!userId) return res.redirect('/login');
-        console.log('userid from checkout', userId)
+        
 
 
 
@@ -37,7 +37,6 @@ const loadCheckout = async (req, res) => {
         const user = await User.findById(userId).lean();
 
         const userName = `${user.firstName} ${user.lastName}`;
-        console.log('user details in checkout', userName)
 
 
         //  cart data getting
@@ -116,11 +115,11 @@ const loadCheckout = async (req, res) => {
             };
         }).filter(Boolean);
 
-        console.log('cartitem for blocked item', cartItems)
+      
 
         // address getting
         const addressDoc = await Address.findOne({ userId });
-        console.log('address data in cart', addressDoc);
+    
 
         let defaultAddress = null;
         let otherAddresses = [];
@@ -133,20 +132,20 @@ const loadCheckout = async (req, res) => {
         }
 
 
-        console.log('checkout username', defaultAddress)
+      
 
         const coupons = await Coupon.find()
-        console.log('coupon arrangement', coupons)
+        
 
         let subtotal = 0;
         if (cartItems.length > 0) {
             subtotal = cartItems.reduce((sum, item) => sum + (item.total || 0), 0);
         }
-        console.log('subtotla needed', subtotal);
+        
 
         const deliveryFee = 50;
         const totalAmount = subtotal + deliveryFee;
-        console.log('checkout page total', totalAmount);
+      
         const razorpayKeyId = process.env.RAZORPAY_KEY_ID;
         res.render('checkout', {
             userId,
@@ -162,7 +161,7 @@ const loadCheckout = async (req, res) => {
         });
 
     } catch (error) {
-        console.log('Error in load checkout:', error);
+       
         res.status(500).send('Internal Server Error');
     }
 };
@@ -173,7 +172,7 @@ const loadCheckout = async (req, res) => {
 const addAddress = async (req, res) => {
     try {
         const userId = req.session.userId;
-        console.log('userid in checkout page', userId);
+       
         if (!userId) return res.status(401).json({ message: 'Unauthorized' });
 
         const { type, fullName, phone, street, city, state, pinCode, country, isDefault } = req.body;
@@ -234,7 +233,7 @@ const editAddress = async (req, res) => {
             street, city, state, pinCode, country, isDefault
         } = req.body;
 
-        console.log('Edit address by type:', type);
+   
 
         const updateAddress = await Address.findOneAndUpdate(
             { userId: userId, "address.type": type },
@@ -253,7 +252,7 @@ const editAddress = async (req, res) => {
             { new: true }
         );
 
-        console.log("Updated Address:", updateAddress);
+       
 
         if (!updateAddress) {
             return res.status(404).json({ success: false, message: "Address not found" });
@@ -262,7 +261,7 @@ const editAddress = async (req, res) => {
         res.status(200).json({ success: true, message: "Address updated successfully" });
 
     } catch (error) {
-        console.log('Edit address error:', error);
+        
         res.status(500).json({ success: false, message: "Server error" });
     }
 };
@@ -275,7 +274,7 @@ const deleteAddress = async (req, res) => {
 
         if (!userId) return res.status(401).json({ success: false, message: 'Unauthorized' });
 
-        console.log('Deleting address:', addressId);
+       
 
 
 
@@ -292,7 +291,7 @@ const deleteAddress = async (req, res) => {
         res.status(200).json({ success: true, message: 'Address deleted successfully' });
 
     } catch (error) {
-        console.log('Checkout page delete address error:', error);
+      
         res.status(500).json({ success: false, message: 'Server error' });
     }
 };
@@ -309,7 +308,7 @@ const placeOrder = async (req, res) => {
                 return { ...item, regularPrice: variant.regularPrice }
             })
         )
-        console.log('antas what is this', product.regularPrice)
+       
    
         let codLimit=25000;
 
@@ -321,8 +320,10 @@ const placeOrder = async (req, res) => {
         let couponApplied = false;
         let couponDiscount = 0;
         let couponCode=null;
-        console.log('request body from place order:', req.body);
-        console.log('coupon status chsangeing', req.body.coupon)
+      
+          
+        
+
         if (coupon && coupon.isActive) {
             couponApplied = true
             couponCode=coupon.code
@@ -336,11 +337,14 @@ const placeOrder = async (req, res) => {
             }
 
             const couponDoc = await Coupon.findOne({ code: coupon.code })
-            console.log('couponDoc', couponDoc)
-            if (couponDoc) {
+          
+
+             if (!couponDoc || !couponDoc.isActive) {
+                return res.status(400).json({ message: "Coupon is no longer active" });
+            }
+             if (couponDoc) {
                 const existUser = couponDoc.usedBy.find(u => u.user.toString() == userId.toString())
-                console.log('existing user', existUser)
-                console.log("Coupon not found:", coupon.code);
+                
 
 
                 if (existUser) {
@@ -348,9 +352,7 @@ const placeOrder = async (req, res) => {
                 } else {
                     await Coupon.findOneAndUpdate({ code: coupon.code }, { $push: { usedBy: { user: userId, count: 1 } } }, { new: true })
                 }
-            } else {
-                console.log('Coupon not found in DB:', coupon.code);
-            }
+            } 
 
         }
 
@@ -382,13 +384,13 @@ const placeOrder = async (req, res) => {
                 { _id: item.productId, 'colorVariants._id': item.variantId },
                 { 'colorVariants.$': 1 }
             );
-            console.log('for of method product', product)
+           
             if (!product || product.colorVariants.length === 0) {
                 return res.status(404).json({ success: false, message: 'Product or variant not found.' });
             }
 
             const variant = product.colorVariants[0];
-            console.log('for of method variat', variant)
+        
             const regularPrice = variant.regularPrice || 0;
             const sellingPrice = item.price;
             const discount = regularPrice > 0 ? (regularPrice - sellingPrice) : 0;
@@ -421,8 +423,7 @@ const placeOrder = async (req, res) => {
             });
           }
         
-          console.log('Wallet user ID:', wallet.userId);
-          console.log('Wallet balance:', wallet.balance);
+     
         
           const walletBalance = wallet.balance;
         
@@ -466,8 +467,6 @@ const placeOrder = async (req, res) => {
             couponApplied,
             couponDiscount
         });
-
-        console.log('new order to save:', newOrder);
 
         await newOrder.save();
         
@@ -553,7 +552,7 @@ const loadPlaceOrder = async (req, res) => {
 
         // Calculate delivery fee if not stored separately
         const deliveryFee = 50;
-        console.log('find delivery features', deliveryFee)
+      
         res.render('place-order', {
             paymentMethod: order.paymentMethod,
             orderId: order.orderId,

@@ -268,8 +268,7 @@ document.getElementById('retryPaymentBtn').addEventListener('click', async () =>
     const newRazorpayOrderId=data.order_id;
     
 
-    console.log('anything data:',data)
-    console.log('anything orderId:',data.order_id)
+   
     if (!res.ok || !data.success) throw new Error(data.message || 'Failed to retry order');
 
     // 🧾 Razorpay checkout options
@@ -314,7 +313,7 @@ const options = {
       });
 
       const verifyData = await verifyRes.json();
-      console.log('verifydata:', verifyData);
+      
 
       if (verifyRes.ok && verifyData.success) {
         window.location.href = `/place-order?razorpayOrderId=${newRazorpayOrderId}`;
@@ -326,7 +325,6 @@ const options = {
   },
   modal: {
     ondismiss: function () {
-      console.log('Payment modal closed by user');
        window.location.reload(); 
     }
   }
@@ -334,13 +332,13 @@ const options = {
 
 const rzp = new Razorpay(options);
 
-// 🧩 ⬇️ Add this listener here before opening the payment modal
+//  Add this listener here before opening the payment modal
 rzp.on('payment.failed', function (response) {
 
   window.location.href = `/payment-failure?razorpayOrderId=${newRazorpayOrderId}&error=${encodeURIComponent(response.error.description)}`;
 });
 
-// 🧾 Open Razorpay payment modal
+// Open Razorpay payment modal
 rzp.open();
 
 

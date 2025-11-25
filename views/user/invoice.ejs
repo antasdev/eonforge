@@ -258,7 +258,7 @@
                                 <td>₹<%= (item.regularPrice || 0).toLocaleString() %>
                                 </td>
                                 <td class="text-green-600">
-                                    <%= item.discount> 0 ? '-₹'+(item.discount).toLocaleString() : '–' %>
+                                    <%= item.discount> 0 ? '₹'+(item.discount).toLocaleString() : '–' %>
                                 </td>
                                 <td>₹<%= (item.price  * (item.stock || 1)).toLocaleString() %>
                                 </td>

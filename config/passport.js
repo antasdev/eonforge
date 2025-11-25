@@ -5,13 +5,14 @@ const env = require("dotenv").config();
 const { generateReferralCode, applyReferral } =require('../helpers/refferal');
 
 
-
+const isProduction = process.env.NODE_ENV === 'production'
 
 passport.use(new GoogleStrategy({
     clientID: process.env.GOOGLE_CLIENT_ID,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    callbackURL: "http://localhost:3005/auth/google/callback"
-},
+    callbackURL: isProduction
+        ? process.env.GOOGLE_CALLBACK_URL_PROD
+        : process.env.GOOGLE_CALLBACK_URL_DEV,},
 
     async (accessToken, refreshToken, profile, done) => {
         try {
@@ -39,7 +40,7 @@ passport.use(new GoogleStrategy({
                     referralCode: generateReferralCode(firstName,lastName)
                 });
                 const googleId = user.googleId
-                console.log('googleId from passport', googleId)
+          
                 await user.save();
                 return done(null, user)
             }
