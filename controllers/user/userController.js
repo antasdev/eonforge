@@ -62,7 +62,6 @@ if (cart && cart.items) {
       cartCount
     });
   } catch (err) {
-    console.error("Error in loadHomePage:", err);
     return res.status(500).send("Internal Server Error");
   }
 };
