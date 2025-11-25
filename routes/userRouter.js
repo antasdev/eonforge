@@ -19,8 +19,8 @@ const { userAuth, isLogin} = require('../middlewares/auth');
 router.get('/signup', isLogin, userController.loadSignup);
 router.post('/signup', isLogin, userController.signup);
 router.post('/verify-otp',isLogin, userController.verifyOtp)
-router.get('/login',nocache(), isLogin, userController.loadLogin);
-router.post('/login',nocache(), isLogin, userController.login)
+router.get('/login', isLogin, userController.loadLogin);
+router.post('/login', isLogin, userController.login)
 router.get('/verify-otp',isLogin, userController.loadVerifyotp)
 router.post('/resend-otp',isLogin, userController.resendOtp)
 

@@ -41,7 +41,7 @@ const loadHomePage = async (req, res) => {
 
     const isLoggedIn = !!userId;
     let user = null;
-    if (isLoggedIn) user = await User.findOne({_id:userId,isBlocked:false})
+    if (isLoggedIn) user = await User.findOne({_id:userId,isBlocked:false});
   
 
     const cart = await Cart.findOne({ userId });
@@ -286,7 +286,7 @@ const resendOtp = async (req, res) => {
 
 const loadLogin = async (req, res) => {
   try {
-    if (!req.session.User) {
+    if (!req.session.userId) {
       return res.render('login', { success: false, message: "" });
     } else {
       return res.redirect('/');

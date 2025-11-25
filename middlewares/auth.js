@@ -25,7 +25,9 @@ const userAuth = (req, res, next) => {
 const isLogin = async(req, res, next) => {
     
     const user = await User.findOne({_id:req.session.userId,isBlocked:false})
+    console.log(user)
     if (user) {
+        
        
         return res.redirect('/');
     }
