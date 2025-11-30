@@ -22,12 +22,13 @@ const userSchema = new Schema({
         default: ''       
     },
 
-    // phone: {
-    //     type: String,
-    //     unique: true,
-    //     sparse: true,
-    //     default: null
-    // },
+    phone: {
+        type: String,
+        unique: true,
+        sparse: true,
+        default: null,
+        required:false
+    },
 
     dob: {
         type: Date,

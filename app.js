@@ -6,6 +6,7 @@ const session = require("express-session");
 const passport = require('./config/passport')
 const nocache = require('nocache')
 const db = require('./config/db')
+const MongoStore = require('connect-mongo');
 const userRouter = require("./routes/userRouter")
 const adminRouter = require("./routes/adminRouter")
 const errorController = require("./controllers/error/errorController")
@@ -13,20 +14,29 @@ db()
 
 app.use(nocache())
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }))
+app.use(express.json({ limit: "50mb" }));
+app.use(express.urlencoded({ limit: "50mb",extended: true }))
 
+// Trust proxy (required if behind Nginx/HTTPS)
+app.set("trust proxy", 1);
+
+// Session configuration (production-ready)
 app.use(session({
     secret: process.env.SESSION_SECRET,
     resave: false,
-    saveUninitialized: true,
+    saveUninitialized: false,
+    store: MongoStore.create({
+        mongoUrl: process.env.MONGODB_URI, // use the same DB connection
+        collectionName: "sessions",
+        ttl: 72 * 60 * 60 // 3 days in seconds
+    }),
     cookie: {
-        secure: false,
+        secure: process.env.NODE_ENV === "production", // HTTPS only in prod
         httpOnly: true,
-        maxAge: 72 * 60 * 60 * 1000
+        sameSite: "lax",
+        maxAge: 72 * 60 * 60 * 1000 // 3 days in ms
     }
-}))
-
+}));
 
 app.use(passport.initialize());
 app.use(passport.session());
