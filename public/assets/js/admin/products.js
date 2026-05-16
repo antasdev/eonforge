@@ -258,6 +258,7 @@
               <label for="color-name-${index}" class="block text-xs font-medium text-gray-700 mb-1">Color Name <span class="text-red-500">*</span></label>
               <input type="text" id="color-name-${index}" name="colorVariants[${index}].colorName" 
                      value="${variant.colorName || ""}" 
+                     pattern="[A-Za-z]+" oninput="this.value=this.value.replace(/[^A-Za-z]/g,'')"
                      class="w-full px-2 py-2 border border-gray-300 rounded-lg text-sm" 
                      placeholder="e.g., Ocean Blue">
               <span id="error5-${index}" class="error-message text-red-500"></span>
@@ -361,7 +362,7 @@
             ` : ""}
             <input type="hidden" name="colorVariants[${index}]._id" value="${variant._id || ""}">
           </div>
-          <button type="button" class="remove-variant-btn text-red-500 text-sm" title="Remove this variant">
+          <button type="button" class="remove-variant-btn  text-sm" title="Remove this variant">
             <i class="fas fa-trash"></i>
           </button>
         `;

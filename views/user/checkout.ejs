@@ -1090,7 +1090,10 @@ function renderCoupons() {
 }
 
 function applyCoupon(coupon) {
-    if (!coupon.isActive || new Date(coupon.expiryDate) < new Date() || <%= subtotal || 0 %> < coupon.minimumPurchaseAmount) {
+      const requiredMinimum = coupon.discountValue * 2;
+      const subtotal = <%= subtotal || 0 %>;
+
+    if (!coupon.isActive ||subtotal < requiredMinimum || new Date(coupon.expiryDate) < new Date() || subtotal< coupon.minimumPurchaseAmount) {
         showToast('This coupon is not applicable', 'error');
         return;
     }
@@ -1307,7 +1310,8 @@ function renderCartSummary() {
 
     cartSummary.innerHTML = `
         <div class="flex justify-between items-center text-sm">
-            <span class="text-text-secondary">Subtotal (${cartItems.length} items)</span>
+            <span class="text-text-secondary">Subtotal (<%= cartItems.filter(item => item.status !== 'Blocked')
+                     .reduce((sum, item) => sum + item.quantity, 0) %> items)</span>
             <span class="font-medium text-primary">₹${subtotal.toLocaleString()}</span>
         </div>
         <div class="flex justify-between items-center text-sm">

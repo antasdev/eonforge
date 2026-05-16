@@ -52,7 +52,7 @@ const createRazorpayOrder = async (req, res) => {
 
             const variant = product.colorVariants.find(v => v._id.toString() === item.variantId);
             if (!variant || variant.stock < item.quantity) {
-                throw new Error(`Product ${item.productName} is out of stock or insufficient quantity`);
+               return res.status(500).json({ success: false, message: `Only ${variant.stock} unit(s) left for ${item.productName} (${variant.colorName} variant).` });
             }
         }
 

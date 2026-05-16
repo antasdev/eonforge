@@ -459,7 +459,7 @@
                         <div id="items-mobile-<%= order.orderId.slice(1,8) %>" class="hidden md:hidden space-y-3">
                             <% (order.orderItems || []).forEach((item) => { 
                                 const qty = item.stock ?? 1;
-                                const reg = Number(item.regularPrice ?? item.mrp ?? item.price ?? item.unitPrice ?? item.variantData?.price ?? 0);
+                                const reg = Number((item.price+item.discount) ?? item.mrp ?? item.price ?? item.unitPrice ?? item.variantData?.price ?? 0);
                                 const fin = Number(item.finalAmount ?? item.total ?? item.sellingPrice ?? item.price ?? 0);
                             %>
                             <div class="rounded-lg border border-gray-200 bg-white p-4">
@@ -515,7 +515,7 @@
                                 <tbody>
                                     <% (order.orderItems || []).forEach((item) => { 
                                         const qty = Number(item.stock ?? item.quantity ?? 1);
-                                        const reg = Number(item.regularPrice ?? item.mrp ?? item.price ?? item.unitPrice ?? item.variantData?.price ?? 0);
+                                        const reg = Number((item.price+item.discount) ?? item.mrp ?? item.price ?? item.unitPrice ?? item.variantData?.price ?? 0);
                                         const finUnit = Number(item.finalAmount ?? item.total ?? item.sellingPrice ?? item.price ?? 0);
                                         const finTotal = finUnit * (qty || 1);
                                     %>
@@ -1059,7 +1059,7 @@
             }
 
             function getQty(item) { return Number(item.quantity ?? item.qty ?? item.stock ?? 1); }
-            function getReg(item) { return Number(item.regularPrice ?? item.mrp ?? item.price ?? item.unitPrice ?? (item.variantData?.price ?? 0)); }
+            function getReg(item) { return Number((item.price+item.discount) ?? item.mrp ?? item.price ?? item.unitPrice ?? (item.variantData?.price ?? 0)); }
             function getFinUnit(item) { return Number(item.finalAmount ?? item.total ?? item.sellingPrice ?? item.price ?? 0); }
             function getColor(item) { return item.color ?? item.variantData?.color?.name ?? item.variantData?.color ?? '—'; }
             function getBrand(item) { return item.brand ?? item.productBrand ?? item.variantData?.brand ?? '—'; }

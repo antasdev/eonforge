@@ -122,6 +122,9 @@ async function sendVerificationEmail(email, otp) {
 
 const loadVerifyotp = async (req, res) => {
   try {
+    if (!req.session.userData) {
+      return res.redirect('/signup');
+    }
     res.render('verify-otp')
 
   } catch (error) {

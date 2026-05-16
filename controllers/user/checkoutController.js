@@ -394,10 +394,12 @@ const placeOrder = async (req, res) => {
             const regularPrice = variant.regularPrice || 0;
             const sellingPrice = item.price;
             const discount = regularPrice > 0 ? (regularPrice - sellingPrice) : 0;
-            if (variant.stock < item.stock) {
+         
+            if (variant.stock < item.quantity) {
                 return res.status(400).json({
                     success: false,
-                    message: `Only ${variant.stock} unit(s) left of "${variant.colorName}" variant.`,
+                    message: `Only ${variant.stock} unit(s) left for ${item.productName} (${variant.colorName} variant).`
+,
                 });
             }
             orderItems.push({

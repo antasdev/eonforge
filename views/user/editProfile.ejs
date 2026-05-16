@@ -229,14 +229,26 @@
             <div class="bg-white rounded-2xl shadow-2xl p-8 form-shadow animate-slide-up">
                 <div class="text-center mb-8">
                     <div class="relative inline-block">
-                        <img id="profilePreview" src="<%= user.profileImage %>"
-                            alt="Profile Image"
-                            class="w-24 h-24 rounded-full object-cover border-4 border-white shadow-lg profile-image-preview mx-auto">
-                        <div class="absolute bottom-0 right-0 btn-primary rounded-full p-2 shadow-lg cursor-pointer hover:bg-accent-light transition duration-300"
-                            onclick="document.getElementById('profileImage').click()">
-                            <i class="fas fa-camera text-primary text-sm"></i>
-                        </div>
-                    </div>
+    <% if (user.profileImage) { %>
+        <!-- If image exists -->
+        <img id="profilePreview" src="<%= user.profileImage %>"
+             alt="Profile Image"
+             class="w-24 h-24 rounded-full object-cover border-4 border-white shadow-lg mx-auto">
+    <% } else { %>
+        <!-- Default initial avatar -->
+        <div id="profilePreview"
+             class="w-24 h-24 rounded-full bg-gray-300 flex items-center justify-center 
+                    text-3xl font-bold text-white border-4 border-white shadow-lg mx-auto">
+            <%= user.firstName ? user.firstName.charAt(0).toUpperCase() : '?' %>
+        </div>
+    <% } %>
+
+    <div class="absolute bottom-0 right-0 btn-primary rounded-full p-2 shadow-lg cursor-pointer hover:bg-accent-light transition duration-300"
+         onclick="document.getElementById('profileImage').click()">
+        <i class="fas fa-camera text-primary text-sm"></i>
+    </div>
+</div>
+
                     <p class="text-text-secondary text-sm mt-2">Click the camera icon to change photo</p>
                 </div>
 
@@ -246,16 +258,16 @@
                             class="block text-text-primary font-semibold text-sm uppercase tracking-wide">
                             <i class="fas fa-user text-accent mr-2"></i>First Name
                         </label>
-                        <input type="text" id="firstName" name="firstName" value="<%= user.firstName || '' %>"
+                        <input type="text" id="firstName" name="firstName" value="<%= user.firstName || '' %>" pattern="[A-Za-z]+" oninput="this.value=this.value.replace(/[^A-Za-z]/g,'')"
                             class="w-full p-4 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent-light transition duration-300 input-focus"
-                            placeholder="Enter your first name" required>
+                            placeholder="Enter your first name" required >
                     </div>
                     <div class="space-y-2">
                         <label for="lastName"
                             class="block text-text-primary font-semibold text-sm uppercase tracking-wide">
                             <i class="fas fa-user text-accent mr-2"></i>Last Name
                         </label>
-                        <input type="text" id="lastName" name="lastName" value="<%= user.lastName || '' %>"
+                        <input type="text" id="lastName" name="lastName" value="<%= user.lastName || '' %>" pattern="[A-Za-z]+" oninput="this.value=this.value.replace(/[^A-Za-z]/g,'')"
                             class="w-full p-4 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent-light transition duration-300 input-focus"
                             placeholder="Enter your last name" required>
                     </div>
@@ -285,15 +297,17 @@
                             <i class="fas fa-phone text-accent mr-2"></i>Phone Number
                         </label>
                         <input type="tel" id="phone" name="phone" value="<%= user.phone || '' %>"
-                            pattern="[0-9]{10}"
+                            pattern="^[6-9][0-9]{9}$"
+                            oninput="this.value = this.value.replace(/[^0-9]/g,'')"
                             class="w-full p-4 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent-light transition duration-300 input-focus"
-                            placeholder="Enter your phone number (e.g., 1234567890)">
+                            placeholder="Enter your phone number">
                     </div>
                     <div class="space-y-2">
                         <label for="dob" class="block text-text-primary font-semibold text-sm uppercase tracking-wide">
                             <i class="fas fa-calendar text-accent mr-2"></i>Date of Birth
                         </label>
                         <input type="date" id="dob" name="dob"
+                            max="2008-01-01"required
                             value="<%= user.dob ? new Date(user.dob).toISOString().split('T')[0] : '' %>"
                             class="w-full p-4 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent-light transition duration-300 input-focus">
                     </div>

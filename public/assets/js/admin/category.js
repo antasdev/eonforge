@@ -50,6 +50,8 @@
     // Close modal
     function closeModal() {
       categoryModal.classList.add('hidden');
+      messageElement.textContent = '';
+      messageElement.style.color = '';
     }
 
     closeModalBtn.addEventListener('click', closeModal);

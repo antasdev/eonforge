@@ -400,10 +400,7 @@
                                                 <% } %>
                                     </div>
 
-                                    <div class="flex items-center space-x-2 text-sm">
-                                        <span class="text-purple-600 font-bold">⚡ NeuCoins</span>
-                                        <span class="text-text-secondary">on purchase</span>
-                                    </div>
+
                             </div>
                         </div>
                     </div>
@@ -444,11 +441,7 @@
 
                         <!-- Additional Features -->
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <div
-                                class="flex items-center justify-center space-x-2 bg-red-50 text-red-600 py-3 px-4 rounded-xl hover:bg-red-100 transition-colors cursor-pointer">
-                                <i class="fas fa-cube"></i>
-                                <span class="font-medium">3D Try On</span>
-                            </div>
+                      
                       
                             <% const productVariantKey=`${product._id}:${selectedVariant._id}`; %>
                                 <button onclick="toggleWishlist('<%= product._id %>','<%= selectedVariant._id %>', this)"
